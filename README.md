@@ -3,8 +3,8 @@
 **Prevent, diagnose, and recover isolation contamination in multi-layered architectures.**
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Claude Code Skill](https://img.shields.io/badge/Claude%20Code-Skill-blueviolet)](https://claude.ai/claude-code)
-[![Eval Score](https://img.shields.io/badge/Eval%20Score-98%25-brightgreen)]()
+[![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet)](https://claude.ai/claude-code)
+[![Eval TCs](https://img.shields.io/badge/Eval%20TCs-16%20cases-brightgreen)](evals/evals.json)
 
 ---
 
@@ -38,37 +38,26 @@ DUDA structurally prevents this by:
 
 ## Quick Start
 
-### Installation
+### Installation (Plugin Marketplace)
+
+**Two commands — that's it.**
 
 ```bash
-# Clone the repository
-git clone https://github.com/popup-studio-ai/duda-skill.git
+# 1. Add the marketplace
+/plugin marketplace add DavidKim0326/DUDA
 
-# Copy to your Claude Code skills directory
-cp -r duda-skill/duda ~/.claude/skills/duda
+# 2. Install the plugin
+/plugin install duda
 ```
 
-Or add directly as a Claude Code skill:
+> Hooks (auto-detection) are registered automatically via `hooks/hooks.json`.
+
+### Alternative: Manual Installation
+
 ```bash
-# From your project root
-mkdir -p .claude/skills
-cp -r path/to/duda .claude/skills/duda
-```
-
-### Optional: Install Hook for Auto-Detection
-
-Add to your `.claude/settings.json`:
-```json
-{
-  "hooks": {
-    "UserPromptSubmit": [
-      {
-        "type": "command",
-        "command": "node .claude/skills/duda/hooks/duda-hook.js"
-      }
-    ]
-  }
-}
+# Clone and copy to skills directory
+git clone https://github.com/DavidKim0326/DUDA.git
+cp -r DUDA ~/.claude/skills/duda
 ```
 
 ### First Use
@@ -188,24 +177,28 @@ If Python is not available, DUDA includes a manual analysis guide in SKILL.md. I
 ## Project Structure
 
 ```
-duda/
-├── SKILL.md              ← Main skill definition
-├── README.md             ← This file
-├── LICENSE               ← Apache-2.0
-├── CONTRIBUTING.md       ← How to contribute
-├── scripts/
-│   ├── init.py           ← Topological exploration + map generation
-│   ├── analyze.py        ← Import dependency analysis + layer tagging
-│   ├── trust.py          ← 4-axis trust measurement + 95-point gate
-│   ├── audit.py          ← Contamination path detection + root cause
-│   ├── map_update.py     ← Post-work partial map refresh
-│   └── memory.py         ← Recursive learning memory
-├── references/
-│   └── patterns.md       ← Risk/fix patterns by isolation type
+DUDA/
+├── skills/
+│   └── duda/
+│       └── SKILL.md          ← Main skill definition (Claude Code reads this)
 ├── hooks/
-│   └── duda-hook.js      ← Claude Code trigger detection hook
-└── evals/
-    └── evals.json        ← Skill validation test cases
+│   ├── hooks.json            ← Plugin hook registration (auto-loaded)
+│   └── duda-hook.js          ← UserPromptSubmit trigger detection
+├── scripts/
+│   ├── init.py               ← Topological exploration + map generation
+│   ├── analyze.py            ← Import dependency analysis + layer tagging
+│   ├── trust.py              ← 4-axis trust measurement + 95-point gate
+│   ├── audit.py              ← Contamination path detection + root cause
+│   ├── map_update.py         ← Post-work partial map refresh
+│   └── memory.py             ← Recursive learning memory
+├── references/
+│   └── patterns.md           ← Risk/fix patterns by isolation type
+├── evals/
+│   └── evals.json            ← 16 skill validation test cases
+├── README.md
+├── LICENSE                   ← Apache-2.0
+├── CONTRIBUTING.md
+└── CODE_OF_CONDUCT.md
 ```
 
 ---
@@ -240,9 +233,15 @@ Transplant deny list:
 
 ## Requirements
 
-- **Claude Code** v2.1.0+ (Skills 2.0 support)
+- **Claude Code** v2.1.0+ (Plugin / Skills 2.0 support)
 - **Python 3.8+** (optional — for script automation; manual mode works without)
 - No external pip packages required (stdlib only)
+
+## Uninstall
+
+```bash
+/plugin uninstall duda
+```
 
 ---
 
@@ -280,6 +279,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## Credits
 
-Created by [POPUP STUDIO PTE. LTD.](https://github.com/popup-studio-ai)
+Created by [David Kim](https://github.com/DavidKim0326)
 
 > *"Moles appear separate above ground, but underground they're all connected by tunnels."*

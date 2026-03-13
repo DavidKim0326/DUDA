@@ -37,21 +37,24 @@ description: >
 ## Skill Structure
 
 ```
-duda/
-├── SKILL.md              ← Flow control (this file)
+DUDA/                          ← Plugin root (${CLAUDE_PLUGIN_ROOT})
+├── skills/
+│   └── duda/
+│       └── SKILL.md           ← Flow control (this file)
 ├── scripts/
-│   ├── init.py           ← INIT: topological exploration + DUDA_MAP.md generation
-│   ├── trust.py          ← Trust score 4-axis measurement + 95-point gate
-│   ├── analyze.py        ← TRANSPLANT: import dependency analysis + layer tagging
-│   ├── audit.py          ← AUDIT: contamination path detection + root cause
-│   ├── map_update.py     ← Post-work diff → partial map refresh
-│   └── memory.py         ← Recursive learning memory layer
-├── references/
-│   └── patterns.md       ← Risk/fix patterns by isolation type
+│   ├── init.py                ← INIT: topological exploration + DUDA_MAP.md generation
+│   ├── trust.py               ← Trust score 4-axis measurement + 95-point gate
+│   ├── analyze.py             ← TRANSPLANT: import dependency analysis + layer tagging
+│   ├── audit.py               ← AUDIT: contamination path detection + root cause
+│   ├── map_update.py          ← Post-work diff → partial map refresh
+│   └── memory.py              ← Recursive learning memory layer
 ├── hooks/
-│   └── duda-hook.js      ← Claude Code UserPromptSubmit trigger detection
+│   ├── hooks.json             ← Plugin hook registration (auto-loaded)
+│   └── duda-hook.js           ← Claude Code UserPromptSubmit trigger detection
+├── references/
+│   └── patterns.md            ← Risk/fix patterns by isolation type
 └── evals/
-    └── evals.json        ← Test cases for skill validation
+    └── evals.json             ← Test cases for skill validation
 ```
 
 ---

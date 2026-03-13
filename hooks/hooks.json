@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-hooks.json",
+  "description": "DUDA — Isolation Guardian Skill for Claude Code",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/duda-hook.js",
+            "timeout": 3000
+          }
+        ]
+      }
+    ]
+  }
+}
