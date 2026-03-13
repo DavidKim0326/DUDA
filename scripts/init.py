@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 """
 DUDA init.py — Mole flood-fill exploration engine
 Explores the project in topological sort order from leaf nodes upward

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 """
 DUDA trust.py — 4-axis trust measurement + 95-point gate
 Determines execution permission numerically.

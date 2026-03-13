@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 """
 DUDA memory.py — Recursive learning memory layer
 Automatically saves work results and paths when a trigger fires.
