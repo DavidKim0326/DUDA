@@ -36,34 +36,49 @@ description: >
 
 # DUDA — Isolation Guardian Skill
 
-> Moles appear separate above ground, but underground they're all connected by tunnels.
-> A transplant request is executed only after mapping the entire tunnel system.
-> Execution is blocked below a 95-point trust score.
+## What is DUDA?
+
+DUDA prevents your AI agent from accidentally breaking isolation boundaries in multi-layered projects.
+
+**The problem it solves:**
+```
+You:    "Use the AdminPanel component from platform in the tenant app"
+Agent:  "Sure!" *copies files, creates imports*
+Result: Tenant users can now see admin controls. Production incident.
+```
+
+DUDA blocks this by analyzing every dependency before any code moves.
+
+**Who needs it:**
+- Multi-tenant SaaS (shared code, separated data)
+- Platform → Tenant/Franchise hierarchies
+- Monorepos with multiple apps sharing packages
+- Microservices that should only communicate via APIs
+
+## Quick Command Reference
+
+| Command | What it does |
+|---------|-------------|
+| `duda init` | Map your project's isolation structure (run this first) |
+| `duda scan <path>` | Quick check: "Is this file safe to import?" |
+| `duda transplant` | Safely migrate code across isolation boundaries |
+| `duda audit` | Find and diagnose isolation contamination |
+| `duda fix` | Auto-generate fixes after audit/transplant diagnosis |
+| `duda guard` | Check staged files for breaches (CI/pre-commit) |
+
+## Getting Started
+
+```
+Step 1:  duda init              → Maps your entire project (one-time setup)
+Step 2:  Approve the map        → Confirms the isolation structure
+Step 3:  Work normally          → DUDA activates when it detects migration
+                                   or contamination keywords in your prompts
+```
+
+After init, DUDA works automatically. It listens for keywords like "use X in Y",
+"copy from", "data leak", "wrong tenant" and activates the right mode.
 
 ---
-
-## Skill Structure
-
-```
-DUDA/                          ← Plugin root (${CLAUDE_PLUGIN_ROOT})
-├── skills/
-│   └── duda/
-│       └── SKILL.md           ← Flow control (this file)
-├── scripts/
-│   ├── init.py                ← INIT: topological exploration + DUDA_MAP.md generation
-│   ├── trust.py               ← Trust score 4-axis measurement + 95-point gate
-│   ├── analyze.py             ← TRANSPLANT: import dependency analysis + layer tagging
-│   ├── audit.py               ← AUDIT: contamination path detection + root cause
-│   ├── map_update.py          ← Post-work diff → partial map refresh
-│   └── memory.py              ← Recursive learning memory layer
-├── hooks/
-│   ├── hooks.json             ← Plugin hook registration (auto-loaded)
-│   └── duda-hook.js           ← Claude Code UserPromptSubmit trigger detection
-├── references/
-│   └── patterns.md            ← Risk/fix patterns by isolation type
-└── evals/
-    └── evals.json             ← Test cases for skill validation
-```
 
 ---
 
