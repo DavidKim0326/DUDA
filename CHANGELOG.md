@@ -2,6 +2,18 @@
 
 All notable changes to DUDA will be documented in this file.
 
+## [2.1.1] - 2026-03-14
+
+### Improved
+- **SKILL.md tuned to skill-creator standards** (718 → 359 lines)
+  - Description compressed from 35 lines to 10 lines with pushy trigger language
+  - 4-axis Trust Score details → `references/trust-scoring.md`
+  - Memory System → `references/memory.md`
+  - "Why" explanations added throughout (95-point rationale, axis weights, topological sort reasoning)
+  - Manual Mode and Core Principles absorbed into references
+  - Progressive Disclosure: 4 reference files for 3-tier loading
+- **README** — Install commands separated into individual code blocks for easy copy
+
 ## [2.1.0] - 2026-03-14
 
 ### Added
