@@ -43,11 +43,13 @@ DUDA structurally prevents this by:
 
 **Two commands — that's it.**
 
+**1.**
 ```bash
-# 1. Add the marketplace
 /plugin marketplace add DavidKim0326/DUDA
+```
 
-# 2. Install the plugin
+**2.**
+```bash
 /plugin install duda
 ```
 
