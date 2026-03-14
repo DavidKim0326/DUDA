@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "DUDA — Isolation Guardian Plugin for Claude Code",
-    "version": "2.1.0"
+    "version": "2.1.1"
   },
   "plugins": [
     {
       "name": "duda",
       "source": "./",
       "description": "Prevents, diagnoses, and recovers isolation contamination in multi-layered architectures (multi-tenant SaaS, platform-derivative, monorepo, microservice).",
-      "version": "2.1.0",
+      "version": "2.1.1",
       "author": {
         "name": "DavidKim0326"
       },
