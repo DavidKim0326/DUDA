@@ -44,6 +44,21 @@ const TRIGGERS = {
     ],
   },
 
+  // SCOPE mode triggers (feature-centric analysis)
+  scope: {
+    explicit: [
+      "duda scope",
+    ],
+    patterns: [
+      /\bduda\s+scope\s+/i,
+      /\bshow\b.*\bfiles?\b.*\brelated\s+to\b/i,
+      /\bcheck\b.*\bisolation\b.*\b(for|of)\b.*\b(feature|system|module)\b/i,
+      /\banalyze\b.*\bfeature\b.*\bisolation\b/i,
+      /\bwhat\s+files?\b.*\binvolved\s+in\b/i,
+      /\bfind\b.*\ball\b.*\bfiles?\b.*\b(for|about|related)\b/i,
+    ],
+  },
+
   // TRANSPLANT mode triggers
   transplant: {
     explicit: [
@@ -197,6 +212,7 @@ function generateContext(mode, confidence) {
   const modeDescriptions = {
     init: "DUDA INIT mode — Generate isolation map via topological exploration",
     scan: "DUDA SCAN mode — Quick single-file/directory analysis (lite, no map required)",
+    scope: "DUDA SCOPE mode — Feature-centric isolation analysis (discovers related files by keyword)",
     transplant: "DUDA TRANSPLANT mode — Analyze and safely migrate code across isolation boundaries",
     act: "DUDA ACT mode — Generate and apply isolation fixes (post-AUDIT or post-TRANSPLANT)",
     guard: "DUDA GUARD mode — Check staged files for isolation breaches (CI/pre-commit gate)",

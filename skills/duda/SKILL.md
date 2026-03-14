@@ -229,6 +229,80 @@ Suggestion:  Cannot import directly. Use adapter pattern (Strategy 2).
 
 ---
 
+## SCOPE Mode (Feature-Centric Analysis) *(v2.1)*
+
+### When
+- `duda scope <feature-description>` command
+- Developer describes a feature instead of providing a file path
+- "Check isolation for the billing system"
+- "Show me all files related to tenant onboarding"
+- "What files are involved in the permission feature?"
+
+### Execution
+
+```bash
+python scripts/scope.py --feature "<description>" [--depth 1] [--min-score 0.3]
+```
+
+**What scope.py does:**
+
+```
+1. Extract keywords from description + expand with synonym database
+2. Search filenames and file contents for keyword matches
+3. Expand via import chains (configurable depth, default 1-hop)
+4. Score relevance (0.0~1.0) and filter by threshold
+5. Group by DUDA_MAP layer tags (if map exists)
+6. Detect cross-layer imports → flag violations
+7. Assess risk level (LOW / MEDIUM / HIGH / CRITICAL)
+8. Cache results for instant re-analysis
+```
+
+**Options:**
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--depth <n>` | 1 | Import chain expansion depth |
+| `--min-score <f>` | 0.3 | Minimum relevance score |
+| `--max-files <n>` | 20 | Maximum files to display |
+| `--no-map` | false | Skip DUDA_MAP lookup |
+| `--files-only` | false | Output file paths only (for piping) |
+| `--json` | false | JSON output |
+
+**SCOPE Output:**
+```
+🔍 DUDA SCOPE — "account permission management"
+
+Keywords: permission, role, rbac, auth, grant, access, account, user
+Discovered: 15 files across 4 directories
+
+[PLATFORM] 3 files ██████░░░░░░░░░░░░░░ 20%
+  src/platform/roles/superAdmin.ts        (0.95)
+  src/platform/stores/roleStore.ts        (0.72)
+
+[SHARED] 5 files ██████████░░░░░░░░░░ 33%
+  src/shared/types/permission.ts          (0.98)
+  src/shared/utils/rbac.ts                (0.91)
+
+[TENANT] 4 files ████████░░░░░░░░░░░░ 27%
+  src/tenant/admin/roleManager.tsx        (0.89)
+
+⚠️ Cross-Layer: 3 violations (TENANT → PLATFORM)
+
+Risk Level:  🟠 HIGH
+Recommended:
+  1. duda audit — trace full contamination path
+  2. duda scan src/tenant/admin/roleManager.tsx
+  3. duda fix — auto-generate adapter pattern
+```
+
+**Piping to other commands:**
+```bash
+# Scan each discovered file in detail
+duda scope "auth" --files-only | xargs -I {} duda scan {}
+```
+
+---
+
 ## TRANSPLANT Mode
 
 > **Principle: Not a single line of code is touched until trust score reaches 95.**
