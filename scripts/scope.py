@@ -131,14 +131,17 @@ class FileMatch:
 
 
 class CrossLayerDep:
-    __slots__ = ("source_file", "source_layer", "target_file", "target_layer")
+    __slots__ = ("source_file", "source_layer", "target_file", "target_layer",
+                 "import_type")
 
     def __init__(self, source_file: str, source_layer: str,
-                 target_file: str, target_layer: str):
+                 target_file: str, target_layer: str,
+                 import_type: str = "direct"):
         self.source_file = source_file
         self.source_layer = source_layer
         self.target_file = target_file
         self.target_layer = target_layer
+        self.import_type = import_type  # "direct" | "re-export" | "dynamic"
 
     def to_dict(self) -> dict:
         return {
@@ -146,6 +149,7 @@ class CrossLayerDep:
             "source_layer": self.source_layer,
             "target": self.target_file,
             "target_layer": self.target_layer,
+            "import_type": self.import_type,
         }
 
 
@@ -418,30 +422,38 @@ class RelevanceScorer:
 
     @staticmethod
     def score(files: dict[str, FileMatch], total_keywords: int) -> list[FileMatch]:
-        """Score each file and return sorted list."""
+        """Score each file and return sorted list.
+
+        total_keywords: count of ORIGINAL keywords (before synonym expansion)
+                        to avoid diluting scores when many synonyms are added.
+        """
         if total_keywords == 0:
             total_keywords = 1
 
         for fmatch in files.values():
             score = 0.0
+            unique_hits = len(fmatch.keyword_hits)
+            hit_count = fmatch.total_hits()
 
-            if fmatch.source == "filename":
+            if fmatch.source in ("filename", "filename+content"):
                 # Filename matches are highly relevant
-                keyword_ratio = len(fmatch.keyword_hits) / total_keywords
                 score = RelevanceScorer.WEIGHT_FILENAME + \
-                        RelevanceScorer.WEIGHT_CONTENT * keyword_ratio
+                        RelevanceScorer.WEIGHT_CONTENT * min(unique_hits / total_keywords, 1.0)
+                if fmatch.source == "filename+content":
+                    # Bonus for matching both name and content
+                    score = min(score + 0.1, 1.0)
             elif fmatch.source == "content":
-                # Content matches: normalize by hit count
-                hit_count = fmatch.total_hits()
-                content_score = min(hit_count / 10.0, 1.0)  # cap at 10 hits
-                keyword_coverage = len(fmatch.keyword_hits) / total_keywords
-                score = RelevanceScorer.WEIGHT_CONTENT * content_score * 0.6 + \
-                        RelevanceScorer.WEIGHT_CONTENT * keyword_coverage * 0.4
+                # Content matches: combine hit depth + keyword breadth
+                depth_score = min(hit_count / 5.0, 1.0)  # cap at 5 hits
+                breadth_score = min(unique_hits / max(total_keywords, 1), 1.0)
+                score = RelevanceScorer.WEIGHT_CONTENT * depth_score * 0.5 + \
+                        RelevanceScorer.WEIGHT_CONTENT * breadth_score * 0.5 + \
+                        RelevanceScorer.WEIGHT_FILENAME * breadth_score * 0.3
             elif fmatch.source == "import":
                 # Import-discovered files get base import score
                 import_connections = len(fmatch.imports) + len(fmatch.imported_by)
                 score = RelevanceScorer.WEIGHT_IMPORT * \
-                        min(import_connections / 5.0, 1.0)
+                        min(import_connections / 3.0, 1.0)
 
             fmatch.score = min(score, 1.0)
 
@@ -651,6 +663,21 @@ class ScopeCache:
             age_hours = (datetime.now(timezone.utc) - cached_at).total_seconds() / 3600
             if age_hours > 24:
                 return None
+            # Check file checksums — invalidate if any file changed
+            checksums = entry.get("file_checksums", {})
+            for fpath, cached_hash in checksums.items():
+                full_path = self.root / fpath
+                if full_path.is_file():
+                    try:
+                        current_hash = hashlib.md5(
+                            full_path.read_bytes()
+                        ).hexdigest()[:12]
+                        if current_hash != cached_hash:
+                            return None  # file changed, invalidate
+                    except OSError:
+                        return None
+                else:
+                    return None  # file deleted, invalidate
             return entry
         except (json.JSONDecodeError, ValueError, KeyError):
             return None
@@ -667,12 +694,24 @@ class ScopeCache:
                 pass
 
         key = self._normalize_key(description)
+        # Compute file checksums for cache invalidation
+        file_checksums = {}
+        for f in result.files:
+            fpath = self.root / f.path
+            if fpath.is_file():
+                try:
+                    content = fpath.read_bytes()
+                    file_checksums[f.path] = hashlib.md5(content).hexdigest()[:12]
+                except OSError:
+                    pass
+
         data["entries"][key] = {
             "keywords": result.keywords,
             "files": [f.path for f in result.files],
             "file_count": len(result.files),
             "risk_level": result.risk_level,
             "created_at": datetime.now(timezone.utc).isoformat(),
+            "file_checksums": file_checksums,
         }
 
         self.cache_path.write_text(json.dumps(data, indent=2, ensure_ascii=False))
@@ -809,7 +848,8 @@ def run_scope(feature: str, root: str = ".", depth: int = 1,
         all_matches = searcher.expand_imports(all_matches, depth=depth)
 
     # Step 4: Score and filter
-    scored = RelevanceScorer.score(all_matches, len(expanded))
+    # Use original keyword count (not expanded) to avoid score dilution
+    scored = RelevanceScorer.score(all_matches, len(keywords))
     filtered = RelevanceScorer.filter_by_threshold(scored, min_score)
     filtered = filtered[:max_files]
 

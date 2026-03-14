@@ -265,6 +265,7 @@ python scripts/scope.py --feature "<description>" [--depth 1] [--min-score 0.3]
 | `--min-score <f>` | 0.3 | Minimum relevance score |
 | `--max-files <n>` | 20 | Maximum files to display |
 | `--no-map` | false | Skip DUDA_MAP lookup |
+| `--no-cache` | false | Skip cache, force fresh analysis |
 | `--files-only` | false | Output file paths only (for piping) |
 | `--json` | false | JSON output |
 
